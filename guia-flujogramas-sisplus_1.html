@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guía interactiva · Flujogramas SISPLUS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f6f4ee;
+    --paper-2:#efece3;
+    --ink:#16221f;
+    --ink-soft:#46554f;
+    --line:#d8d3c6;
+    --teal:#0d7c70;
+    --teal-deep:#0a5249;
+    --teal-tint:#e2efec;
+    --coral:#dd5347;
+    --coral-tint:#fbe7e3;
+    --green:#1f9d6b;
+    --green-tint:#e3f3eb;
+    --red:#d8473c;
+    --red-tint:#fae3e0;
+    --gold:#b3852a;
+    --gold-tint:#f4ecd9;
+    --shadow:0 1px 2px rgba(22,34,31,.05),0 8px 28px rgba(22,34,31,.08);
+    --shadow-lg:0 2px 6px rgba(22,34,31,.06),0 24px 60px rgba(22,34,31,.14);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'IBM Plex Sans',sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(circle at 1px 1px, rgba(22,34,31,.04) 1px, transparent 0);
+    background-size:26px 26px;
+  }
+  .wrap{max-width:980px;margin:0 auto;padding:0 22px}
+
+  /* ---------- HEADER ---------- */
+  header.top{padding:44px 0 26px;border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:11px;font-weight:700;letter-spacing:.5px;font-size:15px}
+  .brand .dot{width:11px;height:11px;border-radius:50%;background:var(--coral);box-shadow:0 0 0 4px var(--coral-tint)}
+  .brand b{color:var(--teal)}.brand span{color:var(--coral)}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(30px,5vw,46px);line-height:1.05;margin:20px 0 10px;letter-spacing:-.5px}
+  .lede{font-size:17px;color:var(--ink-soft);max-width:62ch}
+  .meta-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+  .chip{font-size:12.5px;font-weight:500;background:var(--paper-2);border:1px solid var(--line);padding:5px 11px;border-radius:100px;color:var(--ink-soft)}
+
+  /* ---------- HOME CARDS ---------- */
+  .home-grid{display:grid;gap:18px;margin:30px 0 10px;grid-template-columns:1fr}
+  @media(min-width:560px){.home-grid{grid-template-columns:repeat(2,1fr)}}
+  @media(min-width:880px){.home-grid{grid-template-columns:repeat(4,1fr)}}
+  .flow-card{
+    position:relative;text-align:left;cursor:pointer;background:#fff;border:1px solid var(--line);
+    border-radius:18px;padding:24px 22px 22px;box-shadow:var(--shadow);
+    transition:transform .25s cubic-bezier(.2,.8,.2,1),box-shadow .25s,border-color .25s;
+    display:flex;flex-direction:column;min-height:230px;overflow:hidden;
+  }
+  .flow-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);border-color:var(--teal)}
+  .flow-card::after{content:"";position:absolute;inset:0 0 auto 0;height:5px;background:var(--accent,var(--teal))}
+  .fc-num{font-family:'Fraunces',serif;font-size:40px;font-weight:600;color:var(--accent,var(--teal));line-height:1;opacity:.92}
+  .fc-title{font-family:'Fraunces',serif;font-size:20px;font-weight:600;margin:12px 0 8px;letter-spacing:-.2px}
+  .fc-sub{font-size:13.5px;color:var(--ink-soft);flex:1}
+  .fc-go{margin-top:16px;font-size:13px;font-weight:600;color:var(--accent,var(--teal));display:inline-flex;align-items:center;gap:6px}
+  .fc-go .ar{transition:transform .25s}
+  .flow-card:hover .fc-go .ar{transform:translateX(4px)}
+
+  .home-extra{display:flex;flex-wrap:wrap;gap:12px;margin:26px 0 60px}
+  .ghost-btn{font-family:inherit;font-size:13.5px;font-weight:600;cursor:pointer;background:transparent;border:1.5px solid var(--line);color:var(--ink);padding:11px 18px;border-radius:100px;transition:.2s;display:inline-flex;align-items:center;gap:8px}
+  .ghost-btn:hover{border-color:var(--teal);color:var(--teal-deep)}
+
+  /* ---------- FLOW VIEW ---------- */
+  #flowView{display:none;padding-bottom:80px}
+  .flow-head{position:sticky;top:0;z-index:30;background:rgba(246,244,238,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:14px 0}
+  .flow-head .wrap{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .back-btn{font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;background:#fff;border:1px solid var(--line);color:var(--ink);padding:8px 14px;border-radius:100px;transition:.2s;white-space:nowrap}
+  .back-btn:hover{border-color:var(--teal);color:var(--teal-deep)}
+  .flow-head h2{font-family:'Fraunces',serif;font-size:18px;font-weight:600;flex:1;min-width:160px;letter-spacing:-.2px}
+  .flow-head .badge{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500;background:var(--accent,var(--teal));color:#fff;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;flex-shrink:0}
+
+  .progress-row{display:flex;align-items:center;gap:12px;margin:18px 0 6px}
+  .progress{flex:1;height:6px;background:var(--paper-2);border-radius:100px;overflow:hidden;border:1px solid var(--line)}
+  .progress i{display:block;height:100%;background:var(--accent,var(--teal));width:0;border-radius:100px;transition:width .45s cubic-bezier(.2,.8,.2,1)}
+  .progress-pct{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500;color:var(--accent,var(--teal));min-width:38px;text-align:right;transition:color .3s}
+
+  .scope-box{background:var(--accent-tint,var(--teal-tint));border:1px solid var(--line);border-radius:14px;padding:14px 16px;font-size:14px;color:var(--ink-soft);margin-bottom:8px}
+  .scope-box b{color:var(--ink)}
+
+  /* trail / cards */
+  #trail{margin-top:18px;display:flex;flex-direction:column}
+  .node{
+    position:relative;background:#fff;border:1px solid var(--line);border-radius:16px;
+    padding:20px 22px;margin-bottom:14px;box-shadow:var(--shadow);
+    animation:rise .45s cubic-bezier(.2,.8,.2,1) both;
+  }
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  .node.done{opacity:.72}
+  .node.active{border-color:var(--accent,var(--teal));box-shadow:var(--shadow-lg)}
+  .node.decision{border-left:4px solid var(--gold)}
+  .node.endnode{border-color:var(--green);background:var(--green-tint)}
+  .node.initnode{border-left:4px solid var(--accent,var(--teal))}
+
+  .n-kicker{display:flex;align-items:center;gap:9px;margin-bottom:6px}
+  .n-step{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;color:#fff;background:var(--accent,var(--teal));padding:3px 9px;border-radius:6px}
+  .n-step.dec{background:var(--gold)}
+  .n-type{font-size:11px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--ink-soft)}
+  .n-title{font-family:'Fraunces',serif;font-size:19px;font-weight:600;letter-spacing:-.2px;line-height:1.2}
+  .n-desc{font-size:14px;color:var(--ink-soft);margin-top:8px}
+
+  .n-field{display:flex;gap:10px;margin-top:12px;font-size:14px;align-items:flex-start}
+  .n-field .lbl{flex-shrink:0;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--teal-deep);background:var(--teal-tint);padding:3px 9px;border-radius:6px;margin-top:1px;min-width:96px;text-align:center}
+  .n-field .val{color:var(--ink)}
+  .n-field .val b{font-weight:600}
+
+  .soportes{list-style:none;margin-top:6px;display:flex;flex-wrap:wrap;gap:7px}
+  .soportes li{font-size:12.5px;background:var(--paper-2);border:1px solid var(--line);padding:5px 10px;border-radius:8px;color:var(--ink-soft)}
+
+  .note{display:flex;gap:9px;margin-top:11px;font-size:13px;border-radius:10px;padding:10px 13px;line-height:1.45}
+  .note .ic{flex-shrink:0;font-weight:700}
+  .note.info{background:var(--teal-tint);color:var(--teal-deep)}
+  .note.warn{background:var(--coral-tint);color:#9c3127}
+  .note.key{background:var(--gold-tint);color:#8a651b;border:1px dashed var(--gold)}
+  .note.exc{background:var(--paper-2);color:var(--ink-soft);border:1px solid var(--line)}
+
+  .pasos{counter-reset:p;list-style:none;margin-top:6px}
+  .pasos li{counter-increment:p;position:relative;padding:5px 0 5px 32px;font-size:14px;color:var(--ink)}
+  .pasos li::before{content:counter(p);position:absolute;left:0;top:4px;width:21px;height:21px;border-radius:50%;background:var(--accent,var(--teal));color:#fff;font-size:11px;font-weight:600;display:grid;place-items:center;font-family:'IBM Plex Mono',monospace}
+
+  /* actions */
+  .actions{margin-top:16px;display:flex;flex-wrap:wrap;gap:10px}
+  .q{font-size:14px;font-weight:600;margin-bottom:2px}
+  .btn{font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;border:none;padding:11px 20px;border-radius:100px;transition:transform .15s,filter .2s,box-shadow .2s;box-shadow:var(--shadow)}
+  .btn:hover{transform:translateY(-2px);filter:brightness(1.04)}
+  .btn:active{transform:translateY(0)}
+  .btn.primary{background:var(--accent,var(--teal));color:#fff}
+  .btn.yes{background:var(--green);color:#fff}
+  .btn.no{background:var(--red);color:#fff}
+  .btn.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line);box-shadow:none}
+  .btn.ghost:hover{border-color:var(--teal);color:var(--teal-deep)}
+
+  .chosen{display:inline-flex;align-items:center;gap:7px;margin-top:13px;font-size:13px;font-weight:600;padding:6px 13px;border-radius:100px}
+  .chosen.yes{background:var(--green-tint);color:#0f6e45}
+  .chosen.no{background:var(--red-tint);color:#a13027}
+  .chosen .tk{font-weight:700}
+
+  .end-wrap{text-align:center;padding:8px 0 0}
+  .end-wrap .big{font-family:'Fraunces',serif;font-size:24px;font-weight:600;color:#147a4f}
+  .end-wrap p{font-size:14px;color:var(--ink-soft);margin:6px 0 16px}
+
+  /* ---------- MODAL ---------- */
+  .modal-bg{display:none;position:fixed;inset:0;background:rgba(22,34,31,.45);backdrop-filter:blur(3px);z-index:60;padding:24px;overflow:auto}
+  .modal-bg.open{display:block;animation:fade .25s}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .modal{max-width:620px;margin:40px auto;background:var(--paper);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow-lg);padding:30px;animation:rise .35s both}
+  .modal h3{font-family:'Fraunces',serif;font-size:24px;font-weight:600;margin-bottom:4px}
+  .modal .sub{font-size:13.5px;color:var(--ink-soft);margin-bottom:18px}
+  .modal .close{float:right;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;background:#fff;border:1px solid var(--line);border-radius:100px;padding:7px 14px}
+  .tip{display:flex;gap:12px;padding:13px 0;border-top:1px solid var(--line)}
+  .tip .ti{flex-shrink:0;width:30px;height:30px;border-radius:9px;background:var(--teal-tint);color:var(--teal-deep);display:grid;place-items:center;font-weight:700;font-family:'Fraunces',serif}
+  .tip b{display:block;font-size:14.5px;margin-bottom:2px}
+  .tip span{font-size:13.5px;color:var(--ink-soft)}
+
+  footer{border-top:1px solid var(--line);padding:24px 0 50px;font-size:12.5px;color:var(--ink-soft)}
+  footer b{color:var(--ink)}
+</style>
+</head>
+<body>
+
+<!-- ============ HOME ============ -->
+<div id="home">
+  <header class="top">
+    <div class="wrap">
+      <div class="brand"><span class="dot"></span><b>Novu</b><span>med</span>&nbsp;· SISPLUS</div>
+      <h1>Guía interactiva de<br>flujogramas · SISPLUS</h1>
+      <p class="lede">Recorre paso a paso los procesos de control de facturación y de caja menor en SISPLUS. Responde las decisiones y la guía te muestra la ruta, los responsables y los soportes de cada actividad.</p>
+      <div class="meta-row">
+        <span class="chip">Facturación · abr 2026</span>
+        <span class="chip">Caja menor · abr 2026</span>
+        <span class="chip">Barranquilla · SISPLUS</span>
+        <span class="chip">4 flujogramas</span>
+      </div>
+    </div>
+  </header>
+  <main class="wrap">
+    <div class="home-grid" id="homeGrid"></div>
+    <div class="home-extra">
+      <button class="ghost-btn" onclick="openTips()">★ &nbsp;Notas generales y tips clave</button>
+    </div>
+  </main>
+  <footer>
+    <div class="wrap">
+      Guía construida a partir del <b>Acta de socialización de flujogramas para facturas, crédito y anticipo</b> (15/04/2026) y del <b>video TEMA 38 · solicitud y legalización de caja menor</b> (29/04/2026). Acceso vía SISPLUS &gt; <b>Flujogramas de procesos</b> &gt; <i>Gestión</i> / <i>Reportes</i>. La configuración de los flujogramas es exclusiva del área de Procesos.
+    </div>
+  </footer>
+</div>
+
+<!-- ============ FLOW VIEW ============ -->
+<div id="flowView">
+  <div class="flow-head">
+    <div class="wrap">
+      <button class="back-btn" onclick="goHome()">← &nbsp;Todos los flujogramas</button>
+      <span class="badge" id="flowBadge">1</span>
+      <h2 id="flowTitle"></h2>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="progress-row">
+      <div class="progress"><i id="progressBar"></i></div>
+      <span class="progress-pct" id="progressPct">0%</span>
+    </div>
+    <div class="scope-box" id="scopeBox"></div>
+    <div id="trail"></div>
+  </div>
+</div>
+
+<!-- ============ MODAL ============ -->
+<div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeTips()">
+  <div class="modal">
+    <button class="close" onclick="closeTips()">Cerrar ✕</button>
+    <h3>Notas generales</h3>
+    <p class="sub">Reglas transversales a los flujogramas de facturación y de caja menor.</p>
+    <div id="tipsList"></div>
+  </div>
+</div>
+
+<script>
+/* ===================== DATOS DE LOS FLUJOGRAMAS ===================== */
+const flows = {
+  f1:{
+    num:1, accent:'#0d7c70', tint:'#e2efec', len:13,
+    title:'Solicitud y legalización de anticipos y pago de contado',
+    sub:'Anticipos y pagos de contado a proveedores.',
+    scope:'Para la <b>solicitud y legalización de anticipos y pagos de contado</b> a proveedores. Lo inicia <b>solo el área de Compras</b> (o quienes soliciten anticipos, p. ej. la Sra. Yolanda en Coonegan).',
+    start:'init',
+    nodes:{
+      init:{type:'init', pasos:[
+        'Ingresar a "Gestión flujogramas".',
+        'Hacer clic en el botón "+".',
+        'Seleccionar "Solicitud y legalización de anticipos y pago de contado".',
+        'En el campo "Observación": NIT del proveedor, nombre del proveedor y número de la orden de compra o de trabajo.',
+        'Hacer clic en "+" y luego "Aceptar" para iniciar.'], next:'s1'},
+      s1:{type:'decision', num:1, name:'¿Servicio a cargo de Soluter?',
+        desc:'Quien inicia indica si el servicio está a cargo de Soluter. Soluter también gestiona compras para Novumed, Altamed, Clínica, etc.', key:'soluter',
+        options:[{label:'Sí',tone:'yes',value:true,next:'s2'},{label:'No',tone:'no',value:false,next:'s2'}]},
+      s2:{type:'step', num:2, name:'Cargar solicitud de anticipo o pago de contado',
+        responsible:a=> a.soluter?'Asistentes de Compras de Soluter':'Equipo de Compras de Alianza Farmacéutica',
+        soportes:['Formato de solicitud de anticipos y pago de contado (versión vigente del flujograma)','Cotización','Comparativo de cotizaciones','Orden de compra / orden de trabajo'],
+        warn:'Solo se permiten archivos PDF. Los formatos en Excel deben convertirse a PDF.', next:'s3'},
+      s3:{type:'step', num:3, name:'Aprobación de la solicitud',
+        responsible:a=> a.soluter?'Abel Burgos':'Sra. Maritza Martínez',
+        exc:'Excepción Coonegan: este paso de aprobación NO aplica y se omite; pasa directamente a causación.', next:'s4'},
+      s4:{type:'step', num:4, name:'Causación', responsible:'Equipo de Contabilidad',
+        desc:'En el cuadro de gestión, Contabilidad relaciona el número de la causación.', next:'s5'},
+      s5:{type:'decision', num:5, name:'Observación o glosa (Auditoría)',
+        desc:'Responsable: Cinco Elementos (auditores). ¿Existen observaciones o glosas?', key:'glosa',
+        options:[{label:'Sí, hay glosa',tone:'no',value:true,next:'s6',note:'El sistema pedirá a quién devolver la solicitud: Contabilidad o quien cargó los soportes.'},
+                 {label:'No',tone:'yes',value:false,next:'s6'}]},
+      s6:{type:'step', num:6, name:'Programación y aprobación de pago', responsible:'Tesorería', next:'s7'},
+      s7:{type:'step', num:7, name:'Notificación de pago al solicitante o proveedor', responsible:'Asistente o auxiliar de Tesorería',
+        soportes:['Soporte de transferencia'],
+        info:'Al proveedor se envía por correo; para personal interno se carga el soporte dentro del flujograma.', next:'s8'},
+      s8:{type:'step', num:8, name:'Confirmación de recibido a satisfacción', responsible:'Quien recibe el producto/servicio (p. ej. coordinador de área o sede)',
+        soportes:['Acta de recibido a satisfacción (servicios)','Entrada de almacén (productos)'],
+        key:'Coloca el número de la factura en "Observación adicional".', next:'s9'},
+      s9:{type:'step', num:9, name:'Verificación contable', responsible:'Equipo de Contabilidad', next:'s10'},
+      s10:{type:'step', num:10, name:'Auditoría de cuentas por pagar', responsible:'Cinco Elementos', next:'s11'},
+      s11:{type:'decision', num:11, name:'¿Aplica pago de saldo?',
+        desc:'Decide Cinco Elementos.', key:'saldo',
+        options:[{label:'Sí (anticipo con saldo)',tone:'yes',value:true,next:'sal1'},
+                 {label:'No (pago de contado)',tone:'no',value:false,next:'end'}]},
+      sal1:{type:'step', name:'Programación de pago del saldo', responsible:'Tesorería', next:'sal2'},
+      sal2:{type:'step', name:'Aprobación del saldo', responsible:'Kimberly', next:'sal3'},
+      sal3:{type:'step', name:'Notificación de pago del saldo', responsible:'Tesorería', next:'sal4'},
+      sal4:{type:'step', name:'Realización de egresos', responsible:'Roberto y Sheila', next:'end'},
+      end:{type:'end'}
+    }
+  },
+
+  f2:{
+    num:2, accent:'#b3852a', tint:'#f4ecd9', len:8,
+    title:'Facturación a crédito con orden de compra u orden de trabajo',
+    sub:'Facturas a crédito con OC (productos) u OT (servicios).',
+    scope:'Para facturas a crédito que cuentan con <b>orden de compra (productos)</b> u <b>orden de trabajo (servicios)</b>: medicamentos, activos fijos, etc. Lo inicia <b>Compras o personal de Almacén</b>.',
+    start:'init',
+    nodes:{
+      init:{type:'init', pasos:[
+        'Ingresar a "Gestión flujogramas".',
+        'Hacer clic en el botón "+".',
+        'Seleccionar "Facturación crédito con orden de compra u orden de trabajo".',
+        'En "Observación": NIT del proveedor, nombre del proveedor y número de la orden de compra / trabajo.',
+        'Hacer clic en "+" y luego "Aceptar" para iniciar.'], next:'d0'},
+      d0:{type:'decision', num:1, name:'¿Es producto?',
+        desc:'Quien inicia indica si es producto o servicio. Esto define toda la ruta.', key:'producto',
+        options:[{label:'Sí, es producto',tone:'yes',value:true,next:'p1'},
+                 {label:'No, es servicio',tone:'no',value:false,next:'v1'}]},
+      /* --- rama PRODUCTO --- */
+      p1:{type:'step', num:2, name:'Cargue de soportes', responsible:'Compras',
+        soportes:['Requisición','Orden de compra','Caso de IT (si aplica)','Cotización','Comparativo de cotizaciones'],
+        info:'Pueden cargarse como PDF o relacionarse en el cuadro de gestión (ej. "RQ número tal", "OC número tal").', next:'p2'},
+      p2:{type:'decision', num:3, name:'¿Servicio a cargo de Soluter?',
+        desc:'Define quién aprueba.', key:'soluter2',
+        options:[{label:'Sí',tone:'yes',value:true,next:'p3',note:'Aprueba: Abel Burgos.'},
+                 {label:'No',tone:'no',value:false,next:'p3',note:'Aprueba: Sra. Maritza.'}]},
+      p3:{type:'decision', num:4, name:'¿Novedad en la recepción?',
+        desc:'Se indica si hay alguna novedad al recibir.', key:'novedad',
+        options:[{label:'Sí, hay novedad',tone:'no',value:true,next:'p3b',note:'Se reporta la novedad a Compras; el proceso se mantiene aquí hasta solucionarla.'},
+                 {label:'No',tone:'yes',value:false,next:'p3b'}]},
+      p3b:{type:'step', name:'Cargue de soportes de la recepción', responsible:'Quien recibe',
+        soportes:['Entrada de almacén','Factura'],
+        key:'Coloca el número de la factura en "Observación adicional".', next:'p4'},
+      p4:{type:'step', num:5, name:'Facturación electrónica', responsible:'Auxiliar de facturación electrónica', next:'p5'},
+      p5:{type:'step', num:6, name:'Contabilidad', responsible:'Equipo de Contabilidad', next:'p6'},
+      p6:{type:'decision', num:7, name:'¿Es activo fijo?',
+        desc:'Contabilidad lo decide.', key:'activo',
+        options:[{label:'Sí',tone:'yes',value:true,next:'p7'},
+                 {label:'No',tone:'no',value:false,next:'end'}]},
+      p7:{type:'step', name:'Verificación de activo fijo', responsible:'Líder de activos fijos',
+        desc:'La líder de activos fijos coloca el código.', next:'end'},
+      /* --- rama SERVICIO --- */
+      v1:{type:'step', num:2, name:'Cargue de soportes del servicio', responsible:'Compras',
+        soportes:['Orden de trabajo','Cotizaciones'], next:'v2'},
+      v2:{type:'decision', num:3, name:'¿Servicio a cargo de Soluter?',
+        desc:'Define quién aprueba.', key:'soluter2',
+        options:[{label:'Sí',tone:'yes',value:true,next:'v3',note:'Aprueba: Abel Burgos.'},
+                 {label:'No',tone:'no',value:false,next:'v3',note:'Aprueba: Sra. Maritza.'}]},
+      v3:{type:'step', num:4, name:'Confirmación de recibido a satisfacción', responsible:'Quien recibió el servicio (p. ej. administradora de la sede)',
+        soportes:['Factura','Acta de trabajo recibido','Soportes del servicio que correspondan'],
+        key:'Coloca el número de la factura en "Observación adicional".', next:'v4'},
+      v4:{type:'step', num:5, name:'Verificación', responsible:'Área de Compras', next:'v5'},
+      v5:{type:'step', num:6, name:'Aceptación de facturación electrónica', responsible:'Facturación electrónica', next:'v6'},
+      v6:{type:'step', num:7, name:'Causación', responsible:'Contabilidad', next:'end'},
+      end:{type:'end', noteBox:'El equipo de auditoría usa el Tablero de gestión para visualizar y auditar los soportes cargados en todo el flujograma.'}
+    }
+  },
+
+  f3:{
+    num:3, accent:'#dd5347', tint:'#fbe7e3', len:8,
+    title:'Facturas a crédito · servicios directos',
+    sub:'Servicios sin orden de compra ni orden de trabajo.',
+    scope:'Para servicios <b>sin OC ni OT</b>: transportadores asistenciales, red de prestadores, libranzas, liquidaciones definitivas, servicios públicos, arriendos, OPS (Novumed, Altamed, Clínica), etc. Lo inician <b>quienes radican las cuentas</b> (Vanessa, Cielo, coordinadores administrativos, Talento Humano, etc.).',
+    start:'init',
+    nodes:{
+      init:{type:'init', pasos:[
+        'Ingresar a "Gestión flujogramas".',
+        'Hacer clic en el botón "+".',
+        'Seleccionar "Facturas a crédito: servicios directos".',
+        'En "Observación": número de cédula o NIT del prestador o proveedor.',
+        'Hacer clic en "+" y luego "Aceptar" para iniciar.'], next:'t1'},
+      t1:{type:'step', num:1, name:'Cargue de soportes', responsible:'Quien inicia el flujograma',
+        soportes:['Cuenta de cobro de cada proveedor u OPS','Correos de vistos buenos de subdirecciones / Dirección científica'],
+        info:'Vistos buenos: Dra. Danitza (Novumed) · Jefe Ingrid (Altamed). Soportes en PDF; los correos de VoBo se adjuntan en cada solicitud individual.',
+        exc:'Transportadores: cargar las cuentas de forma individual por cada transportador (no en un archivo masivo) para gestionar novedades por separado.', next:'t2'},
+      t2:{type:'decision', num:2, name:'¿Factura electrónica?',
+        desc:'Se indica si la factura es electrónica.', key:'fe',
+        options:[{label:'Sí',tone:'yes',value:true,next:'t3',note:'Verificación de facturación electrónica: Yamira realiza la aceptación en Facture.'},
+                 {label:'No',tone:'no',value:false,next:'t3'}]},
+      t3:{type:'step', num:3, name:'Contabilidad', responsible:'Contabilidad',
+        desc:'Se registra el número de causación.', next:'t4'},
+      t4:{type:'decision', num:4, name:'¿Requiere auditoría?',
+        desc:'Contabilidad decide si el servicio requiere auditoría de Cinco Elementos.', key:'aud',
+        options:[{label:'Sí',tone:'yes',value:true,next:'t4b'},
+                 {label:'No',tone:'no',value:false,next:'te1',note:'OPS de Novumed o Altamed: marcar "No" para pasar directo a Tesorería.'}]},
+      t4b:{type:'step', name:'Auditoría', responsible:'Cinco Elementos (cuentas por pagar)',
+        exc:'Clínica Ermita (OPS): paso adicional de revisión y VoBo de las coordinaciones médicas y el Dr. René. · OPS de Clínica: auditoría final con la Jefe Cielo antes de Tesorería.', next:'te1'},
+      te1:{type:'step', num:5, name:'Programación de pago', responsible:'Tesorería', next:'te2'},
+      te2:{type:'step', num:6, name:'Aprobación de pago', responsible:'Tesorería', next:'te3'},
+      te3:{type:'step', num:7, name:'Notificación de pago', responsible:'Tesorería', next:'te4'},
+      te4:{type:'step', num:8, name:'Realización de egresos', responsible:'Roberto y Sheila', next:'end'},
+      end:{type:'end'}
+    }
+  },
+
+  f4:{
+    num:4, accent:'#2f63d8', tint:'#e6edfb', len:9,
+    title:'Solicitud y legalización de caja menor',
+    sub:'Reembolsos y adicionales de caja menor, ahora digital en SIISPLUS.',
+    scope:'Proceso <b>digital</b> en SIISPLUS para solicitar y legalizar la caja menor. Se bifurca al inicio entre <b>reembolso</b> y <b>adicional</b>, y ambas ramas convergen en notificación, legalización y verificación contable. El cargue de archivos es siempre en <b>PDF</b>.',
+    start:'login',
+    nodes:{
+      login:{type:'init', kicker:'Paso previo · 1 de 2', heading:'Inicio de sesión en SIISPLUS', pasos:[
+        'Digite su usuario.',
+        'Digite su contraseña.',
+        'Seleccione la empresa correspondiente y presione "Ingresar".'], next:'modulo'},
+      modulo:{type:'init', kicker:'Paso previo · 2 de 2', heading:'Crear la solicitud de caja menor', pasos:[
+        'Seleccione el entorno (ej. ASISTENCIAL).',
+        'Vaya a "Flujograma de procesos" › "Gestión" › "Flujogramas".',
+        'En la pestaña "Mis flujogramas" haga clic en "+".',
+        'Seleccione el flujograma CAJA MENOR (clic en el "ojito").',
+        'En "Observación" digite la sede y el mes. Ej.: Barranquilla – mayo 2026.',
+        'Haga clic en "+" para iniciar.'],
+        keyNote:'En el campo "Observación general" siempre va la sede y el mes.', next:'d0'},
+      d0:{type:'decision', num:1, name:'¿La solicitud es un reembolso?',
+        desc:'Esta decisión define toda la ruta.', key:'reembolso',
+        options:[{label:'Sí, es reembolso',tone:'yes',value:true,next:'r1',note:'Click en el botón verde (reembolso de caja menor).'},
+                 {label:'No, es un adicional',tone:'no',value:false,next:'a1',note:'Click en el botón rojo (solicitud adicional a la caja menor).'}]},
+      /* --- rama REEMBOLSO --- */
+      r1:{type:'step', name:'Cargar solicitud de caja menor', responsible:'Responsable de la caja menor',
+        desc:'Cargar el formato de Solicitud de Caja Menor diligenciado.',
+        soportes:['Formato de solicitud de caja menor (PDF)'], next:'r2'},
+      r2:{type:'decision', name:'Verificación de saldos y pendientes', responsible:'Contabilidad',
+        desc:'Contabilidad verifica saldos y pendientes. ¿La verificación es correcta?', key:'r_saldos',
+        options:[{label:'Sí, correcta',tone:'yes',value:true,next:'r3'},
+                 {label:'No',tone:'no',value:false,next:'r1',note:'Se devuelve a cargar la solicitud de caja menor.'}]},
+      r3:{type:'decision', name:'Programación de pago', responsible:'Tesorería',
+        desc:'Tesorería programa el pago. ¿Se programa?', key:'r_prog',
+        options:[{label:'Sí, programado',tone:'yes',value:true,next:'r4'},
+                 {label:'No',tone:'no',value:false,next:'r2',note:'Se devuelve a Verificación de saldos y pendientes.'}]},
+      r4:{type:'step', name:'Aprobación de pago', responsible:'Tesorería',
+        desc:'Tesorería aprueba y realiza el pago.', next:'c1'},
+      /* --- rama ADICIONAL --- */
+      a1:{type:'step', name:'Cargar solicitud de adicional', responsible:'Responsable de la caja menor',
+        desc:'Cargar el formato de solicitud (caja menor) para el adicional.',
+        soportes:['Formato de solicitud de caja menor (PDF)'], next:'a2'},
+      a2:{type:'decision', name:'¿Aprobación de adicional?', responsible:'Director responsable',
+        desc:'Seleccionar el nombre del director responsable de aprobar. ¿Lo aprueba?', key:'a_aprob',
+        options:[{label:'Sí, aprobado',tone:'yes',value:true,next:'a3'},
+                 {label:'No',tone:'no',value:false,next:'a1',note:'Se devuelve a cargar la solicitud de adicional.'}]},
+      a3:{type:'decision', name:'¿Autorización de fondo adicional?', responsible:'Tesorería',
+        desc:'Tesorería aprueba el pago del fondo adicional. ¿Se autoriza?', key:'a_auth',
+        options:[{label:'Sí, autorizado',tone:'yes',value:true,next:'a4'},
+                 {label:'No',tone:'no',value:false,next:'a1',note:'Se devuelve a cargar la solicitud de adicional (flecha roja larga).'}]},
+      a4:{type:'step', name:'Programación del fondo adicional', responsible:'Tesorería',
+        desc:'Tesorería programa y realiza el pago del fondo adicional.', next:'c1'},
+      /* --- CONVERGENCIA --- */
+      c1:{type:'step', name:'Notificación de pago', responsible:'Tesorería',
+        desc:'Tesorería notifica el pago.', next:'c2'},
+      c2:{type:'step', name:'Legalización de caja menor', responsible:'Responsable de la caja menor',
+        desc:'El responsable de la caja menor debe cargar los respectivos soportes para la legalización.',
+        soportes:['Soportes de legalización (PDF)'],
+        key:'Todos los archivos se cargan en formato PDF.', next:'c3'},
+      c3:{type:'decision', name:'Verificación contable', responsible:'Contabilidad',
+        desc:'Contabilidad verifica los soportes. ¿Están correctos?', key:'c_verif',
+        options:[{label:'Sí, correctos',tone:'yes',value:true,next:'end'},
+                 {label:'No',tone:'no',value:false,next:'c2',note:'Se devuelve a Legalización para corregir y volver a cargar los soportes.'}]},
+      end:{type:'end', noteBox:'Recuerda: el cargue de archivos en SIISPLUS siempre es en formato PDF.'}
+    }
+  }
+};
+
+const tips = [
+  ['#','Observación adicional = número de factura','En los tres flujogramas de facturación este campo siempre registra el número de la factura. Lo ingresa quien recibe el producto/servicio y permite filtrar por factura en el Tablero de gestión.'],
+  ['$','Caja menor · Observación = sede y mes','En el flujograma de caja menor, al iniciar la solicitud el campo "Observación general" lleva la sede y el mes. Ej.: Barranquilla – mayo 2026.'],
+  ['◧','Caja menor · permiso de uso','Si a un usuario no le aparece el flujograma de Caja Menor en SIISPLUS, debe solicitar el permiso de uso al área de Procesos.'],
+  ['PDF','Solo archivos PDF','Todos los soportes deben ser digitales en PDF. Si hay formatos en Excel, conviértelos a PDF antes de cargarlos.'],
+  ['↺','Correcciones en la misma solicitud','Si una solicitud es rechazada o requiere ajustes, NO crear una nueva. Se corrige y se cargan los soportes actualizados en la misma solicitud devuelta. El correo no dice "rechazado": la actividad vuelve al paso correspondiente.'],
+  ['✉','Notificaciones por correo','Quien es responsable de una actividad recibe un correo de SISPLUS. Si no llegan, el correo no está bien registrado: cargar un caso a Sistemas para corregirlo.'],
+  ['▦','Acceso a Reportes / Tablero de gestión','Contabilidad, Cinco Elementos, Tesorería y Compras deben solicitar a Sistemas el acceso a "Reportes". Para ver reportes de varias empresas se necesita un usuario por empresa; para responder actividades basta un solo usuario.'],
+  ['⚙','Configuración','La configuración de flujogramas es exclusiva del área de Procesos. Si se necesita un paso adicional o dar acceso a alguien, comunicarlo a Procesos.'],
+  ['◉','Facture','Si una factura no llega a Facture, responder en el nodo que "no ha ingresado al sistema para dar la aceptación en Facture". Lo ideal es que todo lo de la DIAN llegue allí.']
+];
+
+/* ===================== ESTADO Y RENDER ===================== */
+let state = {flowId:null, current:null, history:[], answers:{}};
+
+function buildHome(){
+  const g = document.getElementById('homeGrid');
+  g.innerHTML = Object.keys(flows).map(id=>{
+    const f = flows[id];
+    return `<button class="flow-card" style="--accent:${f.accent}" onclick="openFlow('${id}')">
+      <div class="fc-num">0${f.num}</div>
+      <div class="fc-title">${f.title}</div>
+      <div class="fc-sub">${f.sub}</div>
+      <span class="fc-go">Iniciar recorrido <span class="ar">→</span></span>
+    </button>`;
+  }).join('');
+}
+
+function openFlow(id){
+  const f = flows[id];
+  state = {flowId:id, current:f.start, history:[], answers:{}};
+  document.documentElement.style.setProperty('--accent', f.accent);
+  document.documentElement.style.setProperty('--accent-tint', f.tint);
+  document.getElementById('home').style.display='none';
+  document.getElementById('flowView').style.display='block';
+  document.getElementById('flowBadge').textContent = f.num;
+  document.getElementById('flowTitle').textContent = f.title;
+  document.getElementById('scopeBox').innerHTML = f.scope;
+  render();
+  window.scrollTo({top:0});
+}
+
+function goHome(){
+  document.getElementById('flowView').style.display='none';
+  document.getElementById('home').style.display='block';
+  document.documentElement.style.setProperty('--accent', '#0d7c70');
+  document.documentElement.style.setProperty('--accent-tint', '#e2efec');
+  window.scrollTo({top:0});
+}
+
+function resolve(v){ return typeof v==='function'? v(state.answers): v; }
+
+function fieldHTML(node, idx){
+  const f = flows[state.flowId];
+  const total = Object.keys(f.nodes).length;
+  let h='';
+  if(node.type==='init'){
+    h += `<div class="n-kicker"><span class="n-step">${node.kicker||'INICIO'}</span><span class="n-type">${node.kicker?'Antes del flujograma':'Cómo iniciar el flujograma'}</span></div>`;
+    h += `<div class="n-title">${node.heading||'Crear la solicitud'}</div>`;
+    h += `<ol class="pasos">${node.pasos.map(p=>`<li>${p}</li>`).join('')}</ol>`;
+    if(node.keyNote) h += `<div class="note key"><span class="ic">★</span><span><b>Punto clave.</b> ${node.keyNote}</span></div>`;
+  } else if(node.type==='end'){
+    h += `<div class="end-wrap"><div class="big">✓ Fin del proceso</div>`;
+    if(node.noteBox) h += `<p>${node.noteBox}</p>`; else h+=`<p>Has recorrido el flujograma completo.</p>`;
+    h += `<button class="btn ghost" onclick="openFlow('${state.flowId}')">↺ Reiniciar este flujograma</button>
+          <button class="btn primary" style="margin-left:8px" onclick="goHome()">Ver otros flujogramas</button>
+          <div style="margin-top:12px">${backBtn()}</div></div>`;
+    return h;
+  } else {
+    const isDec = node.type==='decision';
+    const stepLabel = node.num? (isDec?`P${node.num}`:`P${node.num}`):'·';
+    h += `<div class="n-kicker"><span class="n-step ${isDec?'dec':''}">${stepLabel}</span><span class="n-type">${isDec?'Decisión':'Actividad'}</span></div>`;
+    h += `<div class="n-title">${node.name}</div>`;
+    if(node.desc) h += `<div class="n-desc">${node.desc}</div>`;
+    if(node.responsible) h += `<div class="n-field"><span class="lbl">Responsable</span><span class="val"><b>${resolve(node.responsible)}</b></span></div>`;
+    if(node.soportes){ h += `<div class="n-field"><span class="lbl">Soportes</span><span class="val"><ul class="soportes">${node.soportes.map(s=>`<li>${s}</li>`).join('')}</ul></span></div>`; }
+    if(node.info) h += `<div class="note info"><span class="ic">ℹ</span><span>${node.info}</span></div>`;
+    if(node.key) h += `<div class="note key"><span class="ic">★</span><span><b>Punto clave.</b> ${node.key}</span></div>`;
+    if(node.warn) h += `<div class="note warn"><span class="ic">!</span><span>${node.warn}</span></div>`;
+    if(node.exc) h += `<div class="note exc"><span class="ic">⚑</span><span>${node.exc}</span></div>`;
+  }
+  return h;
+}
+
+function render(){
+  const f = flows[state.flowId];
+  const trail = document.getElementById('trail');
+  trail.innerHTML='';
+
+  // historial (resuelto)
+  state.history.forEach(h=>{
+    const node = f.nodes[h.nodeId];
+    const div = document.createElement('div');
+    div.className = 'node done '+(node.type==='decision'?'decision':node.type==='init'?'initnode':'');
+    div.innerHTML = fieldHTML(node);
+    if(h.choice){
+      div.innerHTML += `<div class="chosen ${h.choice.tone}"><span class="tk">${h.choice.tone==='yes'?'✓':'✕'}</span> Respuesta: ${h.choice.label}</div>`;
+      if(h.choice.note) div.innerHTML += `<div class="note info"><span class="ic">→</span><span>${h.choice.note}</span></div>`;
+    }
+    trail.appendChild(div);
+  });
+
+  // nodo activo
+  const node = f.nodes[state.current];
+  const div = document.createElement('div');
+  div.className = 'node active '+(node.type==='decision'?'decision':node.type==='end'?'endnode':node.type==='init'?'initnode':'');
+  div.innerHTML = fieldHTML(node);
+
+  if(node.type==='end'){
+    // las acciones se construyen en fieldHTML
+  } else if(node.type==='decision'){
+    let acts = `<div style="width:100%" class="q">Selecciona una opción para continuar:</div><div class="actions">`;
+    acts += node.options.map((o,i)=>`<button class="btn ${o.tone}" onclick="choose(${i})">${o.label}</button>`).join('');
+    acts += backBtn();
+    acts += `</div>`;
+    div.innerHTML += acts;
+  } else {
+    div.innerHTML += `<div class="actions"><button class="btn primary" onclick="advance()">Continuar →</button>${backBtn()}</div>`;
+  }
+  trail.appendChild(div);
+
+  // progreso: llenado por pasos recorridos sobre la longitud típica del flujo
+  const node_end = node.type==='end';
+  const len = f.len || Object.keys(f.nodes).length;
+  let pct = Math.round((state.history.length/len)*100);
+  pct = node_end ? 100 : Math.max(6, Math.min(96, pct));
+  const bar = document.getElementById('progressBar');
+  bar.style.width = pct+'%';
+  document.getElementById('progressPct').textContent = pct+'%';
+
+  div.scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+function advance(){
+  const f = flows[state.flowId];
+  const node = f.nodes[state.current];
+  state.history.push({nodeId:state.current, choice:null});
+  state.current = node.next;
+  render();
+}
+
+function backBtn(){
+  return state.history.length>0 ? `<button class="btn ghost" onclick="goBack()">← Atrás</button>` : '';
+}
+
+function goBack(){
+  if(state.history.length===0) return;
+  const last = state.history.pop();
+  const node = flows[state.flowId].nodes[last.nodeId];
+  if(node.type==='decision' && node.key) delete state.answers[node.key];
+  state.current = last.nodeId;
+  render();
+}
+
+function choose(i){
+  const f = flows[state.flowId];
+  const node = f.nodes[state.current];
+  const opt = node.options[i];
+  if(node.key) state.answers[node.key] = opt.value;
+  state.history.push({nodeId:state.current, choice:{label:opt.label, tone:opt.tone, note:opt.note}});
+  state.current = opt.next;
+  render();
+}
+
+/* ===== modal ===== */
+function openTips(){
+  document.getElementById('tipsList').innerHTML = tips.map(t=>
+    `<div class="tip"><div class="ti">${t[0]}</div><div><b>${t[1]}</b><span>${t[2]}</span></div></div>`).join('');
+  document.getElementById('modalBg').classList.add('open');
+}
+function closeTips(){ document.getElementById('modalBg').classList.remove('open'); }
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeTips();});
+
+buildHome();
+</script>
+</body>
+</html>
